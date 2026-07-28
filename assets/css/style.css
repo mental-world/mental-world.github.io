@@ -186,7 +186,14 @@ a.shake{animation:nudge .45s cubic-bezier(.36,.07,.19,.97)}
   --wm-w:min(clamp(232px,25.5vw,388px),calc(var(--wm-sky) / .72));
   position:relative;isolation:isolate;overflow:hidden;
   min-height:100svh;
-  padding-top:var(--hero-gap);
+  /* --hero-gap is a viewport function, but the claim written into the gap is
+     sized off the window's *width*, so on any short window the text outgrew the
+     sky and the film began underneath it: the cue line ended up printed on the
+     skyline. clearSay() in hero.js measures the block and publishes the floor.
+     It lands here and not on --hero-gap on purpose — --wm-sky reads --hero-gap,
+     so raising this cannot feed back into the observer's size and set the two
+     chasing each other. */
+  padding-top:max(var(--hero-gap),var(--say-floor,0px));
   display:flex;flex-direction:column;justify-content:flex-end;
   background:var(--hero-sky-band);
 }
