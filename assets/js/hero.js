@@ -404,7 +404,27 @@ function initCity(video, stage) {
   }
 
   /* Project each anchor through that crop. */
+  /* How much sky the opening claim actually needs. Its three lines are set off
+     the window's width, so no height-based gap can be trusted to contain them;
+     this measures the block and hands the stylesheet a floor for the padding.
+     Written only on change, so the ResizeObserver below cannot be re-armed by
+     the write and settle into a loop. */
+  const say = document.getElementById('heroSay');
+  const SAY_CLEAR = 14;   /* the cue must clear the skyline, not just touch it */
+
+  function clearSay() {
+    if (!say) return;
+    const need = Math.ceil(
+      say.getBoundingClientRect().bottom - hero.getBoundingClientRect().top + SAY_CLEAR
+    );
+    const next = `${Math.max(0, need)}px`;
+    if (hero.style.getPropertyValue('--say-floor') !== next) {
+      hero.style.setProperty('--say-floor', next);
+    }
+  }
+
   function place() {
+    clearSay();
     const c = crop();
     if (!c) return;
     const { s, iw: w, ih: h, ox, oy } = c;
@@ -447,6 +467,10 @@ function initCity(video, stage) {
   /* the stage observer misses a height-only resize, and in the stacked layout
      the window's height is the only thing the sums depend on */
   window.addEventListener('resize', place);
+  /* the claim is measured, so it has to be measured in the face it will be set
+     in: the fallback's metrics are not Fraunces's, and the gap is derived from
+     the difference */
+  if (document.fonts) document.fonts.ready.then(place);
   video.addEventListener('loadedmetadata', place);
   /* metadata gives the dimensions but not a frame, and paintSky needs a frame.
      `loadeddata` is the first moment there is one to sample — and the first
