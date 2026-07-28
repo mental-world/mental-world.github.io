@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mental World Modeling</title>
+<meta name="description" content="Mental World Modeling (MWM): a world model that maintains a coupled physical–mental state, renders a target-specific observation, and simulates how an action changes both the scene and the minds inside it.">
+<meta name="theme-color" content="#FBF8F2">
+<meta property="og:title" content="Mental World Modeling">
+<meta property="og:description" content="From simulating physical scenes to simulating the minds that act in them.">
+<meta property="og:image" content="assets/img/mwm-logo-512.png">
+<link rel="icon" type="image/png" href="assets/img/favicon-256.png">
+<link rel="apple-touch-icon" href="assets/img/mwm-logo-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..700&family=Inter:wght@300..800&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@1,6..72,300..600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<!-- ══════════════════════════ TOP BAR ══════════════════════════ -->
+<!-- Everything the bar carries is now one right-hand lockup: the wordmark over
+     the two links, split by a rule. The left of the bar is left empty on
+     purpose — that corner belongs to the observer in the sky below it. -->
+<header class="topbar" id="topbar">
+  <div class="tstack">
+    <a class="brand" href="#top" aria-label="Mental World Modeling, back to top">
+      <img class="brand-mark" src="assets/img/mwm-logo-512.png" alt="">
+      <h1 class="brand-text">Mental World Modeling</h1>
+    </a>
+    <nav class="tlinks" aria-label="Project links">
+      <a href="#" data-link="paper">Paper</a>
+      <a href="https://github.com/mental-world/Mentis" target="_blank" rel="noopener">Code</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ══════════════════════════ HERO ══════════════════════════ -->
+<!-- Miniature-city stage. The sky gap above the film is painted the same cream
+     as the film's own sky, so the two read as one continuous world; the gap is
+     the room the observer occupies. -->
+<section class="hero" id="top">
+
+  <!-- The observer. Two cloud banks sandwich the bust: the upper bank sits
+       behind it, the lower bank in front, so when it rises it passes *through*
+       the weather instead of sliding over it. It stays inside the cloud until a
+       flashpoint is opened, then leans toward whichever event was chosen. -->
+  <!-- The beam. Aimed by the script from beside the figure's head at the
+       readout's left edge, so the panel reads as something he is casting rather
+       than a second window that happens to be open. Stretched to fit by the
+       script, so the geometry here is a unit fan and nothing more.
+
+       Colour sampled off the halo in god-v2.webp (#FFF388 / #FBD28B / #F8D193)
+       rather than picked by eye: the beam and the ring around his head are one
+       light source, and the earlier browner gold read as a painted wedge.
+       Opaque and drawn over everything below it, because a shaft that the cloud
+       bank cuts in half is not lighting anything. -->
+  <svg class="aw-ray" id="awRay" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <!-- transparent for the first eighth: that is the width of the bust, and
+           the rays belong behind him, not across his face -->
+      <linearGradient id="awRayG" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0"    stop-color="#FFF6C8" stop-opacity="0"/>
+        <stop offset=".14"  stop-color="#FFF08C" stop-opacity=".97"/>
+        <stop offset=".52"  stop-color="#FBD989" stop-opacity=".88"/>
+        <stop offset=".88"  stop-color="#F6CB77" stop-opacity=".62"/>
+        <stop offset="1"    stop-color="#F3C468" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="awRayW" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0"    stop-color="#FFFAE2" stop-opacity="0"/>
+        <stop offset=".16"  stop-color="#FFF4C0" stop-opacity=".62"/>
+        <stop offset=".62"  stop-color="#FCE3A4" stop-opacity=".4"/>
+        <stop offset=".93"  stop-color="#F8D68A" stop-opacity=".22"/>
+        <stop offset="1"    stop-color="#F5CE79" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <path class="aw-ray-w" d="M0 50 L100 3 L100 97 Z" fill="url(#awRayW)"/>
+    <g class="aw-ray-f" fill="url(#awRayG)">
+      <path d="M0 49.5 L100 7.2  L100 10.8 L0 50.5 Z"/>
+      <path d="M0 49.5 L100 19.9 L100 22.1 L0 50.5 Z"/>
+      <path d="M0 49.5 L100 30.1 L100 33.9 L0 50.5 Z"/>
+      <path d="M0 49.5 L100 42   L100 44   L0 50.5 Z"/>
+      <path d="M0 49.5 L100 55.1 L100 58.9 L0 50.5 Z"/>
+      <path d="M0 49.5 L100 66.9 L100 69.1 L0 50.5 Z"/>
+      <path d="M0 49.5 L100 77.3 L100 80.7 L0 50.5 Z"/>
+      <path d="M0 49.5 L100 90   L100 92   L0 50.5 Z"/>
+    </g>
+  </svg>
+
+  <div class="wm" id="wmArea" data-state="idle" aria-hidden="true">
+    <span class="wm-halo"></span>
+    <img class="wm-cloud wm-cloud-back"  src="assets/img/cloud-upper.png" alt="" decoding="async">
+    <img class="wm-god" src="assets/img/god-v2.webp" alt="" decoding="async">
+    <img class="wm-cloud wm-cloud-front" src="assets/img/cloud-lower.png" alt="" decoding="async">
+  </div>
+
+  <!-- What the sky says while it is empty. It sits in the open band between the
+       cloud bank and the brand block, and leaves on `is-open`, so the claim is
+       replaced by the evidence for it rather than the two being read at once.
+       Three beats and no more: the assertion, the distinction it turns on, and
+       what to do next. The assertion stays on one line at every width - broken
+       over two it stacked too tall for the sky it has to fit in. -->
+  <div class="hero-say" id="heroSay">
+    <p class="hs-line">A world model needs two states.</p>
+    <p class="hs-sub">One a camera can settle. The other has to be inferred, mind by mind.</p>
+    <p class="hs-cue"><i class="hs-dot" aria-hidden="true"></i>Open an event in the city</p>
+  </div>
+
+  <div class="hero-stage" id="heroStage">
+    <video id="heroVideo" class="hero-video"
+           src="assets/media/city.mp4"
+           autoplay loop muted playsinline preload="auto"
+           tabindex="-1" disablepictureinpicture
+           controlslist="nodownload noplaybackrate noremoteplayback"
+           aria-hidden="true"></video>
+
+    <!-- The join: the gap's own colour carried a little way over the film and
+         faded out, so the two never meet at a hard edge. -->
+    <div class="hero-seam" aria-hidden="true"></div>
+
+    <!-- Three events the system is already watching. data-u / data-v are the
+         anchor inside the film's own 3840x2160 frame, normalised; the script
+         maps them through the object-fit:cover crop so they stay welded to the
+         city at every window size. -->
+    <div class="fp-layer" id="fpLayer">
+      <button class="fp" type="button" data-scene="roadwork" data-u=".2220" data-v=".8300"
+              aria-label="One raised hand, two readings — open this event">
+        <span class="fp-glow"></span>
+        <span class="fp-ring"></span><span class="fp-ring fp-ring-b"></span>
+        <span class="fp-ret"></span>
+        <span class="fp-core"></span>
+        <span class="fp-tag">Roadwork Site</span>
+      </button>
+
+      <button class="fp" type="button" data-scene="park" data-u=".6966" data-v=".7037"
+              aria-label="Three swings, then a fourth — open this event">
+        <span class="fp-glow"></span>
+        <span class="fp-ring"></span><span class="fp-ring fp-ring-b"></span>
+        <span class="fp-ret"></span>
+        <span class="fp-core"></span>
+        <span class="fp-tag">Neighborhood Park</span>
+      </button>
+
+      <!-- inside the tower: the marker carries a small lit window, skewed onto
+           the facade's own plane, so the room is felt before it is opened -->
+      <button class="fp fp-win" type="button" data-scene="office" data-u=".6396" data-v=".4741"
+              aria-label="Two folders, one carrier — open this event">
+        <span class="fp-glow"></span>
+        <span class="fp-room"></span>
+        <span class="fp-ring"></span><span class="fp-ring fp-ring-b"></span>
+        <span class="fp-ret"></span>
+        <span class="fp-core"></span>
+        <span class="fp-tag">Office Floor</span>
+      </button>
+    </div>
+
+    <!-- The line that keeps the frame attached to the city. One path, re-aimed
+         and tweened between scenes rather than redrawn, so switching events
+         reads as the same instrument turning. -->
+    <svg class="ev-link" id="evLink" aria-hidden="true">
+      <path id="evLinkPath" d=""></path>
+      <circle id="evLinkTip" r="3.2"></circle>
+    </svg>
+  </div>
+
+  <!-- ── the observation terminal ──
+       Opens on the clicked flashpoint: the event's own footage, played once,
+       with sound, and a caption saying where in the city this is. -->
+  <div class="ev" id="evFrame" hidden>
+    <div class="ev-body">
+      <div class="ev-screen">
+        <video class="ev-video" id="evVideo" playsinline preload="none"
+               disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback"></video>
+        <span class="ev-scan" aria-hidden="true"></span>
+        <span class="ev-vig" aria-hidden="true"></span>
+        <span class="ev-brk ev-brk-a" aria-hidden="true"></span>
+        <span class="ev-brk ev-brk-b" aria-hidden="true"></span>
+        <span class="ev-brk ev-brk-c" aria-hidden="true"></span>
+        <span class="ev-brk ev-brk-d" aria-hidden="true"></span>
+        <!-- the dialogue, said in text. cues live in scenes.js beside the clip
+             they were transcribed from, so re-cutting one is a one-place edit -->
+        <div class="vs" id="evSub" aria-hidden="true"><span></span></div>
+        <button class="ev-replay" id="evReplay" type="button" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a5 5 0 0 1 5-5h9M18 4l-3-3M18 4l-3 3M20 15a5 5 0 0 1-5 5H6M6 20l3-3M6 20l3 3"/></svg>
+          Replay
+        </button>
+      </div>
+
+      <div class="ev-seek"><i id="evSeek"></i></div>
+
+      <!-- One row: what this is, and the only two switches worth keeping. The
+           rail that used to sit above the picture said "live feed", a channel
+           number and a duration, none of which the clip needed; the close button
+           went with it, since clicking the flashpoint again or pressing Esc both
+           already close this. Labels are kept for screen readers and hidden from
+           the eye — at this size the two icons are the cleaner statement. -->
+      <footer class="ev-cap">
+        <h3 class="ev-title" id="evTitle"></h3>
+        <span class="ev-tools">
+          <button class="ev-btn" id="evLoop" type="button" aria-pressed="false" title="Repeat this clip">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a5 5 0 0 1 5-5h9M18 4l-3-3M18 4l-3 3M20 15a5 5 0 0 1-5 5H6M6 20l3-3M6 20l3 3"/></svg>
+            <span class="ev-btn-t">Loop</span>
+          </button>
+          <button class="ev-btn" id="evMute" type="button" aria-pressed="false" title="Mute this clip">
+            <svg class="ev-i-on"  viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zM16.5 8.5a5 5 0 0 1 0 7M19.5 5.5a9 9 0 0 1 0 13"/></svg>
+            <svg class="ev-i-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zM17 9.5l4 5M21 9.5l-4 5"/></svg>
+            <span class="ev-btn-t ev-mute-t">Sound</span>
+          </button>
+        </span>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ── what the observer makes of it ──
+       Right of the bust, at the far end of the beam. The two halves of the
+       state from §03 run side by side rather than stacked: they are a product,
+       not a sequence, and side by side is also the only arrangement that leaves
+       the city and the terminal any sky. Each half is a screen, not a list —
+       the physical pass is the same event shot from above, the mental pass is
+       what each person in it is actually holding. -->
+  <aside class="aw" id="awPanel" hidden aria-live="polite">
+    <header class="aw-bar">
+      <span class="aw-k">World state</span>
+      <span class="aw-t" id="awScene"></span>
+    </header>
+
+    <div class="aw-panes">
+      <section class="aw-sec aw-phy">
+        <h4 class="aw-h"><span class="aw-dot"></span>Physical<i>observed</i></h4>
+        <div class="aw-screen">
+          <video class="aw-video" id="awPhyVid" muted loop playsinline preload="none"
+                 disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback"
+                 aria-hidden="true"></video>
+          <span class="aw-mesh" aria-hidden="true"></span>
+          <span class="aw-vig" aria-hidden="true"></span>
+          <span class="aw-eye" id="awPhyEye"></span>
+          <!-- inside the picture, because these switch this channel and not the
+               panel: the whole frame is the mute target, and these two are the
+               only things in it that are not. -->
+          <span class="aw-ctl">
+            <button class="aw-btn aw-snd" type="button" aria-pressed="false">
+              <svg class="aw-i-on"  viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zM16.5 8.5a5 5 0 0 1 0 7M19.5 5.5a9 9 0 0 1 0 13"/></svg>
+              <svg class="aw-i-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zM17 9.5l4 5M21 9.5l-4 5"/></svg>
+              <span class="aw-btn-t">Sound on the physical channel</span>
+            </button>
+            <button class="aw-btn aw-lp" type="button" aria-pressed="true">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a5 5 0 0 1 5-5h9M18 4l-3-3M18 4l-3 3M20 15a5 5 0 0 1-5 5H6M6 20l3-3M6 20l3 3"/></svg>
+              <span class="aw-btn-t">Repeat the physical channel</span>
+            </button>
+          </span>
+          <div class="vs vs-sm" id="awPhySub" aria-hidden="true"><span></span></div>
+        </div>
+        <p class="aw-cap" id="awWhere"></p>
+      </section>
+
+      <section class="aw-sec aw-ment">
+        <h4 class="aw-h"><span class="aw-dot"></span>Mental<i>inferred</i></h4>
+        <div class="aw-screen">
+          <video class="aw-video" id="awMentVid" muted loop playsinline preload="none"
+                 disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback"
+                 aria-hidden="true"></video>
+          <span class="aw-mesh" aria-hidden="true"></span>
+          <span class="aw-vig" aria-hidden="true"></span>
+          <span class="aw-eye" id="awMentEye"></span>
+          <span class="aw-ctl">
+            <button class="aw-btn aw-snd" type="button" aria-pressed="true">
+              <svg class="aw-i-on"  viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zM16.5 8.5a5 5 0 0 1 0 7M19.5 5.5a9 9 0 0 1 0 13"/></svg>
+              <svg class="aw-i-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zM17 9.5l4 5M21 9.5l-4 5"/></svg>
+              <span class="aw-btn-t">Sound on the mental channel</span>
+            </button>
+            <button class="aw-btn aw-lp" type="button" aria-pressed="true">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a5 5 0 0 1 5-5h9M18 4l-3-3M18 4l-3 3M20 15a5 5 0 0 1-5 5H6M6 20l3-3M6 20l3 3"/></svg>
+              <span class="aw-btn-t">Repeat the mental channel</span>
+            </button>
+          </span>
+          <div class="vs vs-sm" id="awMentSub" aria-hidden="true"><span></span></div>
+        </div>
+        <p class="aw-cap" id="awMent"></p>
+      </section>
+    </div>
+  </aside>
+</section>
+
+<!-- ══════════════════════════ PREMISE ══════════════════════════ -->
+<section class="sec sec-premise" id="premise">
+  <canvas class="bg-dots" data-bg="dots" aria-hidden="true"></canvas>
+
+  <!-- The film is the argument. It used to be an A/B slider over two stills with
+       a paragraph explaining each, which asked the reader to assemble the point
+       out of parts; the short does it in one pass, so everything here is the
+       head, one line of claim, and the film that makes it. -->
+  <div class="pf-wrap">
+    <div class="sec-head">
+      <p class="kicker"><i>01</i> the premise</p>
+      <h2 class="sec-title">Why the world's next state is <em>also mental</em>.</h2>
+    </div>
+
+    <figure class="pfilm" id="pfilm">
+      <!-- above the frame, not below it: it is the claim the film argues for,
+           and a caption under a film reads as a footnote to it instead -->
+      <figcaption class="pf-cap">
+        A model that tracks the cup but not <em>who knows the cup is hidden</em>
+        predicts the wrong action for a right-looking scene.
+      </figcaption>
+
+      <!-- the frame is the play/pause target; only mute and loop are buttons -->
+      <div class="pf-frame" id="pfFrame">
+        <video class="pf-video" id="pfVideo" src="assets/media/motivation.mp4"
+               playsinline preload="metadata" muted
+               aria-label="Short film: why a world model has to represent minds, not only objects"></video>
+
+        <button class="pf-tap" id="pfTap" type="button" aria-label="Play">
+          <span class="pf-cue" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 5.6 18.4 12 9 18.4z"/></svg>
+          </span>
+        </button>
+
+        <!-- Muted is not a preference, it is the price of starting on scroll:
+             no browser will autoplay audio. The dot on the sound button is the
+             only hint that the film has a voice track worth turning on. -->
+        <div class="pf-ctl">
+          <button class="pf-btn pf-sound is-muted" id="pfSound" type="button" aria-label="Turn sound on">
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4.2 9.4h3L11.7 5.5v13L7.2 14.6h-3z"/>
+              <g class="pf-i-on"><path d="M15.2 9.4a3.6 3.6 0 0 1 0 5.2"/><path d="M17.9 6.9a7.2 7.2 0 0 1 0 10.2"/></g>
+              <g class="pf-i-off"><path d="m15.6 9.7 4.6 4.6"/><path d="m20.2 9.7-4.6 4.6"/></g>
+            </svg>
+          </button>
+          <button class="pf-btn pf-loop" id="pfLoop" type="button" aria-label="Repeat" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6.6 7.4h10.8a2.6 2.6 0 0 1 2.6 2.6v1.4"/><path d="m8.6 4.8-2.7 2.6 2.7 2.6"/>
+              <path d="M17.4 16.6H6.6A2.6 2.6 0 0 1 4 14v-1.4"/><path d="m15.4 19.2 2.7-2.6-2.7-2.6"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- the voice track, said in text — the cues live in main.js so the
+             wording can be edited without re-rendering the film -->
+        <div class="pf-sub" id="pfSub" aria-hidden="true"><span></span></div>
+
+        <div class="pf-line" aria-hidden="true"><i id="pfFill"></i></div>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<!-- ══════════════════════════ THE FRAMEWORK ══════════════════════════ -->
+<section class="sec sec-loop" id="loop">
+  <canvas class="bg-dots" data-bg="dots" aria-hidden="true"></canvas>
+  <div class="wrap wrap-wide">
+    <div class="sec-head">
+      <p class="kicker"><i>02</i> the framework</p>
+      <h2 class="sec-title">Theoretical Framework of <em>Mental World Modeling</em></h2>
+      <p class="lede">
+        Two parties, three operators, one coupled state. The <b class="u-wm">mental world model</b> is an omniscient simulator that first renders what the <b class="u-tg">target</b> can see and infer, and only then lets the target act.
+      </p>
+    </div>
+  </div>
+
+  <!-- the gallery. Panels are laid out in one long strip and the strip is
+       translated; only two parties are ever inside the viewport. -->
+  <div class="mwm" id="mwm">
+    <div class="mwm-wrap">
+      <div class="mwm-ctrl">
+        <button class="tc-btn" id="mwmPlay" aria-label="Pause"><svg viewBox="0 0 24 24" class="i-pause"><rect x="7" y="5" width="3.4" height="14" rx="1.2"/><rect x="13.6" y="5" width="3.4" height="14" rx="1.2"/></svg><svg viewBox="0 0 24 24" class="i-play"><path d="M8 5.5v13l11-6.5z"/></svg></button>
+        <button class="tc-btn" id="mwmNext" aria-label="Next step"><svg viewBox="0 0 24 24"><path d="M7 5.5v13l9-6.5z"/><rect x="16.6" y="5.5" width="2.6" height="13" rx="1.1"/></svg></button>
+      </div>
+
+      <div class="mwm-view">
+        <div class="mwm-track"></div>
+      </div>
+
+      <!-- the transition being applied right now, with live subscripts; each
+           operator carries its own one-line gloss, so the strip is not explained
+           a second time underneath -->
+      <div class="mwm-fx" aria-live="polite"></div>
+    </div>
+
+    <!-- the strip is a fixed-proportion drawing; under about 900px there is no
+         font size at which it stays legible, so narrow screens get the figure
+         itself, to be read the way the paper is read -->
+    <figure class="mwm-flat">
+      <img src="assets/img/fig1-teaser.jpg" alt="Figure 1: one tick of the mental world model loop." loading="lazy">
+      <figcaption>Figure&nbsp;1 — one tick, drawn flat. Open on a wider screen for the animated strip.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ══════════════════════════ WORLD STATE ══════════════════════════ -->
+<section class="sec sec-state" id="state">
+  <canvas class="bg-dots" data-bg="dots" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="kicker"><i>03</i> the state</p>
+      <h2 class="sec-title">Physical World State <em>+</em> Mental World State</h2>
+      <p class="lede">
+        The state space factors as <span class="mx" data-math="\Sc = \Sc^phy \times \Sc^ment"></span>. The physical half stores what
+        exists and how it is configured; the mental half stores the latent variables that decide what all of that
+        <em>means</em> to the agents inside it. Open a branch to see the annotation fields.
+      </p>
+    </div>
+
+    <div class="tax-grid" id="taxGrid">
+      <div class="tax-col" data-side="phy"></div>
+      <div class="tax-col" data-side="ment"></div>
+    </div>
+
+    <div class="prop-box">
+      <p class="pb-tag">Property · why a joint state is necessary</p>
+      <div class="pb-body">
+        <p>A physical-only representation is insufficient whenever two states share a scene but differ in mind:</p>
+        <div class="pb-math" data-math="prop1"></div>
+        <p>and a mental-only representation fails symmetrically. False-belief scenes instantiate the first condition; visibility and affordance scenes instantiate the second.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ MENTIS ══════════════════════════ -->
+<section class="sec sec-mentis" id="mentis">
+  <canvas class="bg-dots" data-bg="dots" aria-hidden="true"></canvas>
+  <div class="wrap wrap-wide">
+    <div class="sec-head">
+      <p class="kicker"><i>04</i> the implementation</p>
+      <h2 class="sec-title"><em>Mentis</em>: An Inspectable Baseline Implementation</h2>
+      <p class="lede">
+        A training-free, fully inspectable baseline that forces an LLM to behave as a mental world model.
+        Six stages, each emitting a machine-checkable artifact, so a wrong answer can be traced to the stage that
+        produced it. <b>Nothing is selected before the branch that justifies it is built.</b>
+      </p>
+    </div>
+
+    <div class="pipe" id="pipe">
+      <div class="pipe-rail" id="pipeRail"></div>
+      <div class="pipe-panel" id="pipePanel"></div>
+    </div>
+
+    <details class="fig-fold">
+      <summary>Full pipeline figure from the paper</summary>
+      <img src="assets/img/mentis-pipeline.jpg" alt="Mentis pipeline figure" loading="lazy">
+    </details>
+  </div>
+</section>
+
+<!-- ══════════════════════════ RESULTS ══════════════════════════ -->
+<section class="sec sec-results" id="results">
+  <canvas class="bg-dots" data-bg="dots" aria-hidden="true"></canvas>
+  <div class="wrap wrap-wide">
+    <div class="sec-head">
+      <p class="kicker"><i>05</i> the evidence</p>
+      <h2 class="sec-title">Experimental <em>Results</em> and Analyses</h2>
+      <p class="lede">
+        448 process-annotated situated decisions, in text, image and sounding video. Eight LLM-based world models, two families. A structural ladder from an options-only floor to full MWM, plus ablations and gold-artifact oracles. <b class="key">Across every rung, every model and every modality, the decisive factor is whether the mind is modeled.</b> Every chart below is live. Click anything.
+      </p>
+    </div>
+
+    <div class="findings" id="findings"></div>
+
+    <div class="chart-block" id="cbLadder">
+      <div class="cb-head">
+        <h3><span class="cb-n">A</span> The necessity ladder</h3>
+        <p>Each rung adds exactly one modeling commitment. Final-action F1 (%), 448 records.
+           <b>Click a rung</b> for what that step buys you; toggle models in the legend.</p>
+      </div>
+      <div class="cb-body">
+        <div class="cb-chart" id="ladderChart"></div>
+        <aside class="cb-read" id="ladderRead"></aside>
+      </div>
+      <div class="cb-sub">
+        <div class="cb-chart" id="ablChart"></div>
+        <aside class="cb-read" id="ablRead"></aside>
+      </div>
+    </div>
+
+    <div class="chart-block" id="cbOracle">
+      <div class="cb-head">
+        <h3><span class="cb-n">B</span> Where the remaining gap lives</h3>
+        <p>Replace one predicted artifact with its gold annotation and re-run. The gain measures the error that
+           stage contributed. <b>Click a bar.</b></p>
+      </div>
+      <div class="cb-body">
+        <div class="cb-chart" id="oracleChart"></div>
+        <aside class="cb-read" id="oracleRead"></aside>
+      </div>
+    </div>
+
+    <div class="chart-block" id="cbSlice">
+      <div class="cb-head">
+        <h3><span class="cb-n">C</span> Where mental modeling pays</h3>
+        <p>The same 448 records, sliced by what the decision requires and by where it happens.
+           <b>Click a category</b> or a modality.</p>
+      </div>
+      <div class="cb-body cb-body-2">
+        <div class="cb-chart" id="scenarioChart"></div>
+        <div class="cb-chart" id="modalityChart"></div>
+      </div>
+      <aside class="cb-read cb-read-wide" id="sliceRead"></aside>
+    </div>
+
+    <div class="table-block">
+      <div class="cb-head">
+        <h3><span class="cb-n">D</span> The full ladder table</h3>
+        <p>Final-action F1 (%) per world model. <b>Click a row</b> to read it; hover a cell for its delta to the row above.</p>
+      </div>
+      <div class="tbl-scroll"><table class="rtable" id="ladderTable"></table></div>
+      <aside class="cb-read" id="tableRead"></aside>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ WHERE IT MATTERS ══════════════════════════ -->
+<section class="sec sec-apps" id="apps">
+  <canvas class="bg-dots" data-bg="dots" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="kicker"><i>06</i> the reach</p>
+      <h2 class="sec-title">When is a mental world model <em>worth it</em>?</h2>
+      <p class="lede">
+        Not everywhere. MWM earns its cost when three conditions hold together, and they hold in most of the
+        places we are already deploying agents.
+      </p>
+    </div>
+
+    <div class="cond-row">
+      <div class="cond"><b>partial observability</b><span>the target's view and the world state come apart</span></div>
+      <div class="cond"><b>mental variables decide</b><span>belief, goal, trust or norm changes which action is rational</span></div>
+      <div class="cond"><b>acts carry meaning</b><span>the same motion can be help, pressure, or deception</span></div>
+    </div>
+
+    <div class="app-grid" id="appGrid"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ CITE ══════════════════════════ -->
+<footer class="sec sec-cite" id="cite">
+  <canvas class="bg-dots" data-bg="dots" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="cite-top">
+      <div class="cite-left">
+        <p class="kicker"><i>07</i> cite this work</p>
+        <h2 class="sec-title">Mental World Modeling</h2>
+        <p class="cite-line">
+          We expect MWM as a next stage of world modeling: from simulating physical scenes,
+          to simulating the minds that act in them.
+        </p>
+        <div class="cite-links">
+          <a href="#" data-link="paper">Paper</a>
+          <a href="https://github.com/mental-world/Mentis" target="_blank" rel="noopener">Code</a>
+          <a href="https://mental-world.github.io" target="_blank" rel="noopener">Homepage</a>
+        </div>
+      </div>
+
+      <div class="cite-box">
+        <div class="cite-box-h"><span>BibTeX</span><button id="copyBib" class="copy-btn">copy</button></div>
+<pre id="bibtex">@article{fei2026mwm,
+  title   = {Mental World Modeling},
+  author  = {Fei, Hao and Zhao, Yiran},
+  year    = {2026},
+  url     = {https://mental-world.github.io}
+}</pre>
+      </div>
+    </div>
+
+    <div class="authors">
+      <div class="au">
+        <b><a href="https://haofei.vip/" target="_blank" rel="noopener">Hao Fei</a></b>
+        <span class="au-corr">(Correspondence)</span>
+        <span>University of Oxford</span>
+        <a href="mailto:haofei7419@gmail.com">haofei7419@gmail.com</a>
+      </div>
+      <div class="au">
+        <b>Yiran Zhao</b><span>National University of Singapore</span>
+      </div>
+      <div class="au-logos">
+        <img src="assets/img/oxford.png" alt="University of Oxford">
+        <img src="assets/img/nus.png" alt="National University of Singapore">
+      </div>
+    </div>
+
+    <div class="foot">
+      <img class="foot-mark" src="assets/img/mwm-logo-512.png" alt="">
+      <span>Mental World Modeling · 2026</span>
+      <span class="foot-r">the model looks at the world, and at the world as the target understands it</span>
+    </div>
+  </div>
+</footer>
+
+<div class="tip" id="tip" role="tooltip" aria-hidden="true"></div>
+
+<script type="module" src="assets/js/main.js"></script>
+</body>
+</html>
