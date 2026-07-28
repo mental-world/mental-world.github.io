@@ -400,7 +400,11 @@ function initCity(video, stage) {
         : Math.max(r.width / vw, r.height / vh);
     const iw = vw * s;
     const ih = vh * s;
-    return { s, iw, ih, ox: (r.width - iw) * 0.5, oy: r.height - ih, w: r.width, h: r.height };
+    /* top-anchored, in step with object-position:50% 0% on .hero-video. The
+       stage now carries the frame's aspect ratio, so `cover` only ever crops
+       the sides and this is 0 in practice — but it has to say which edge it
+       hangs from, or the flashpoints drift the day that stops being true. */
+    return { s, iw, ih, ox: (r.width - iw) * 0.5, oy: 0, w: r.width, h: r.height };
   }
 
   /* Project each anchor through that crop. */
