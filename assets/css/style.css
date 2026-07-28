@@ -192,12 +192,31 @@ a.shake{animation:nudge .45s cubic-bezier(.36,.07,.19,.97)}
      skyline. clearSay() in hero.js measures the block and publishes the floor.
      It lands here and not on --hero-gap on purpose — --wm-sky reads --hero-gap,
      so raising this cannot feed back into the observer's size and set the two
-     chasing each other. */
-  padding-top:max(var(--hero-gap),var(--say-floor,0px));
-  display:flex;flex-direction:column;justify-content:flex-end;
+     chasing each other. Named because the stage's min-height is its complement. */
+  --sky-pad:max(var(--hero-gap),var(--say-floor,0px));
+  padding-top:var(--sky-pad);
+  display:flex;flex-direction:column;justify-content:flex-start;
   background:var(--hero-sky-band);
 }
-.hero-stage{position:relative;width:100%;flex:1 1 auto;min-height:0}
+/* The film hangs from the gap, and its foot is allowed off the bottom of the
+   screen.
+
+   It used to be the other way round — the stage took whatever height was left
+   and `cover` kept the film's foot, which meant a short window cropped the top
+   instead. That crop is what broke the hero on other machines: at 1512x760 it
+   ate 27.8% of the frame, so the first visible row was no longer the film's own
+   sky but the brown haze over the rooftops — and paintSky() samples that row to
+   paint the gap. The whole band above the city went muddy.
+
+   aspect-ratio pins the box to the frame, so the film is never cropped
+   vertically and row 0 is always what the sampler reads; min-height keeps it
+   filling the screen on a tall window, where `cover` crops the sides instead.
+   Losing the foot below the fold costs a small scroll and nothing else. */
+.hero-stage{
+  position:relative;width:100%;flex:0 0 auto;
+  aspect-ratio:3840 / 2160;
+  min-height:calc(100svh - var(--sky-pad));
+}
 /* The same problem as .hero-seam, at the other end: the film simply stopped and
    the paper began. Under everything the hero puts on top of the film (z-index 3
    and up) so it never veils the observer or the caption. */
@@ -210,7 +229,10 @@ a.shake{animation:nudge .45s cubic-bezier(.36,.07,.19,.97)}
    absolute so the height resolves against the flex-sized stage. */
 .hero-video{
   position:absolute;inset:0;display:block;width:100%;height:100%;
-  object-fit:cover;object-position:50% 100%;
+  /* top-anchored, to match the stage: the frame's own sky row has to stay the
+     first visible one, because paintSky() samples it to colour the gap. Keep
+     this in step with `oy` in crop(). */
+  object-fit:cover;object-position:50% 0%;
   pointer-events:none;user-select:none;-webkit-user-select:none;
   background:var(--hero-sky);
   /* This is what was making the sky gap look like a different colour from the
@@ -1049,8 +1071,10 @@ a.shake{animation:nudge .45s cubic-bezier(.36,.07,.19,.97)}
      extra the cue lands on the skyline, and the film's own sky is barely 30px
      tall once the frame is letterboxed to 16/9. */
   .hero{min-height:0;--hero-gap:clamp(214px,30vh,296px)}
-  .hero-stage{flex:0 0 auto;aspect-ratio:16/9}
-  .hero-video{object-fit:contain;object-position:50% 100%}
+  /* min-height:0 undoes the landscape floor: here the hero is exactly gap plus
+     film, and making the stage fill the screen is the dead-cream band above */
+  .hero-stage{flex:0 0 auto;aspect-ratio:16/9;min-height:0}
+  .hero-video{object-fit:contain;object-position:50% 0%}
   .wm{width:clamp(190px,44vw,300px);top:clamp(46px,5vh,64px)}
   /* A portrait screen has no band of sky to the observer's right, so the claim
      goes underneath him and centred, straddling the join into the film's own
