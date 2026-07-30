@@ -490,7 +490,7 @@ function initCity(video, stage) {
      point sits high on a tower and there is no room above it, so the frame
      drops to the reserved line and steps sideways instead — a frame sitting
      on top of the point it claims to be showing explains nothing. */
-  function spot(p, all, W, H, fw, fh, res, floorY) {
+  function spot(p, all, W, H, fw, fh, res, floorY, viewBot) {
     /* lowest edge anything reserved reaches, for the "tuck underneath" pair */
     const resB = res.reduce((m, r) => Math.max(m, r.b), 0);
     /* the frame is allowed to be pushed around, but never up against the glass */
@@ -502,8 +502,18 @@ function initCity(video, stage) {
        is empty ground, so a card sitting 46px off the hero's foot still had its
        lower border — and the whole of its shadow — hanging past the diorama.
        Whichever of the two is higher wins, so a short window still keeps the
-       card off the glass. */
-    const yHi = Math.max(EDGE, Math.min(H - fh - 46, floorY - fh - SHADOW));
+       card off the glass.
+
+       And neither of those knows about the window. Since the film now hangs
+       from the gap and runs off the bottom of the screen, both bounds sit below
+       the fold on a short window — the card was placed against the city's foot
+       and its own foot ended up 131px past the glass at 1512x760. The visible
+       bottom is the third bound, and on any short window it is the one that
+       binds. */
+    const yHi = Math.max(
+      EDGE,
+      Math.min(H - fh - 46, floorY - fh - SHADOW, viewBot - fh - EDGE)
+    );
     const fx = p._hx;
     const fy = p._hy;
 
@@ -556,10 +566,11 @@ function initCity(video, stage) {
             q._hy > y - halo && q._hy < y + fh + halo) s += q === p ? 2.4 : 1.1;
       }
 
-      /* crowding the window edges */
+      /* crowding the window edges — viewBot, not H: the hero's foot is off the
+         bottom of the screen now, so H is not an edge the reader can see */
       const pad = 34;
       s += 0.9 * (Math.max(0, pad - x) + Math.max(0, x + fw - (W - pad)) +
-                  Math.max(0, pad - y) + Math.max(0, y + fh - (H - pad))) / 100;
+                  Math.max(0, pad - y) + Math.max(0, y + fh - (viewBot - pad))) / 100;
 
       s += 0.55 * Math.abs(c.cx - W / 2) / (W / 2);                       /* centred  */
       s += 0.45 * Math.hypot(c.cx - fx, y + fh / 2 - fy) / Math.hypot(W, H); /* nearby */
@@ -703,7 +714,10 @@ function initCity(video, stage) {
       const res = [box(wm), box(aw)].filter(Boolean);
       for (const q of points) { q._hx = q._x; q._hy = q._y + dy; }
       /* cityBot is in stage coords; spot() works in the hero's */
-      pos = spot(p, points, W, H, fw, fh, res, cityBot == null ? H : cityBot + dy);
+      /* how much of the hero the reader can actually see, in the hero's own
+         coordinates — the hero is taller than the window by design now */
+      const viewBot = Math.min(H, window.innerHeight - hr.top);
+      pos = spot(p, points, W, H, fw, fh, res, cityBot == null ? H : cityBot + dy, viewBot);
       aimRay();
     }
 
